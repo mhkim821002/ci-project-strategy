@@ -1,0 +1,30 @@
+{
+    "imposters": [
+      {
+        "port": 3000,
+        "protocol": "http",
+        "stubs": [
+          {
+            "predicates": [
+              {
+                "startsWith": { "path": "/price" }
+              }
+            ],
+            "responses": [
+              {
+                "proxy": {
+                  "to": "http://localhost:65080",
+                  "mode": "proxyOnce",
+                  "predicateGenerators": [{
+                    "matches": {
+                      "path": true
+                    }
+                  }]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }

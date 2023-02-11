@@ -1,0 +1,16 @@
+server:
+  port: 65030
+spring:
+  application:
+    name: strategy
+management:
+  endpoint:
+    health:
+      group:
+        custom:
+          include: diskSpace,ping
+          show-components: always
+          show-details: always
+services:
+  price:
+    url: http://localhost:65020

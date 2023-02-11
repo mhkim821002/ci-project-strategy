@@ -1,0 +1,27 @@
+name: 'Dependency Track Uploader'
+description: 'Dependency Track Uploader'
+inputs:
+  api-key:
+    description: 'Dependency Track API Key'
+    required: true
+  project-key:
+    description: 'Object identifier for a project'
+    required: true
+  api-url:
+    description: 'Dependency Track API URL. The value shoud start from http:// or https://'
+    required: true
+  bom:
+    description: 'File name or CycloneDX SBOM spec with JSON format'
+    required: true
+outputs:
+  api-url:
+    description: 'API Call URL'
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.api-key }}
+    - ${{ inputs.project-key }}
+    - ${{ inputs.api-url }}
+    - ${{ inputs.bom }}
+    

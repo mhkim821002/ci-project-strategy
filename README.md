@@ -1,1 +1,2 @@
-# ci-project-strategy
+# projectset-microservice-strategy
+Strategy Microservice ProjectSet

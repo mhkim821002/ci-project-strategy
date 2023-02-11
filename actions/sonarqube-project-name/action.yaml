@@ -1,0 +1,8 @@
+name: 'SonarQube Community edition project name generator'
+description: 'SonarQube Community edition project name generator'
+outputs:
+  sonarqube-project-name:
+    description: 'SonarQube Project Name'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

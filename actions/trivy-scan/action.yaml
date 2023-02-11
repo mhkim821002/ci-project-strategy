@@ -1,0 +1,82 @@
+name: 'Trivy action'
+description: 'Trivy action with uploading SBOM'
+inputs:
+  scan-type:
+    description: 'Trivy scan type'
+    required: true
+    default: 'fs'
+  trivy-ref:
+    description: 'Trivy scan reference'
+    required: true
+    default: '.'
+  api-key:
+    description: 'Dependency Track API Key'
+    required: true
+  project-key:
+    description: 'Object identifier for a project'
+    required: true
+  api-url:
+    description: 'Dependency Track API URL. The value shoud start from http:// or https://'
+    required: true
+  bom:
+    description: 'File name or CycloneDX SBOM spec with JSON format'
+    required: true
+    default: 'cyclonedx.json'
+  severity:
+    description: 'Scanning severity'
+    required: true
+    default: 'CRITICAL'  
+runs:
+  using: composite
+  steps:
+    - name: Run Trivy vulnerability scanner
+      if: ${{ inputs.scan-type == 'fs' }}
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: ${{ inputs.scan-type }}
+        scan-ref: ${{ inputs.trivy-ref }}
+        ignore-unfixed: true
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: ${{ inputs.severity }}
+    - name: Generate SBOM
+      uses: aquasecurity/trivy-action@master
+      if: ${{ inputs.scan-type == 'fs' }}
+      with:
+        scan-type: ${{ inputs.scan-type }}
+        scan-ref: ${{ inputs.trivy-ref }}
+        ignore-unfixed: true
+        security-checks: vuln
+        format: 'cyclonedx'
+        output: 'cyclonedx.json'
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      if: ${{ inputs.scan-type == 'image' }}
+      with:
+        scan-type: ${{ inputs.scan-type }}
+        image-ref: ${{ inputs.trivy-ref }}
+        ignore-unfixed: true
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: ${{ inputs.severity }}
+        vuln-type: 'os,library'
+    - name: Generate SBOM
+      uses: aquasecurity/trivy-action@master
+      if: ${{ inputs.scan-type == 'image' }}
+      with:
+        scan-type: ${{ inputs.scan-type }}
+        image-ref: ${{ inputs.trivy-ref }}
+        ignore-unfixed: true
+        format: 'cyclonedx'
+        output: 'cyclonedx.json'
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+    - name: Upload SBOM to Dependency Track with Custom Action
+      uses: ./actions/dependency-track
+      with:
+        api-key: ${{ inputs.api-key }}
+        project-key: ${{ inputs.project-key }}
+        api-url: ${{ inputs.api-url }}
+        bom: ${{ inputs.bom }}
